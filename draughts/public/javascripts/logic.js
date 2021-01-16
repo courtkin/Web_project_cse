@@ -3,6 +3,8 @@ function board_array(){
     this.list = null;
     this.color = null;
     this.number = null;
+    this.other = null;
+    this.othercolor = null;
 
     this.ids = {1:[1,0], 2:[3,0], 3:[5,0], 4:[7,0], 5:[9,0],
                 6:[0,1], 7:[2,1], 8:[4,1], 9:[6,1], 10:[8,1],
@@ -15,6 +17,17 @@ function board_array(){
                 41:[1,8], 42:[3,8], 43:[5,8], 44:[7,8], 45:[9,8],
                 46:[0,9], 47:[2,9], 48:[4,9], 49:[6,9], 50:[8,9]};
 
+    this.nums = [[0,1, 0, 2, 0, 3, 0, 4, 0, 5],
+                [6, 0, 7, 0, 8, 0, 9, 0, 10,0],
+                [0,11, 0, 12, 0, 13, 0, 14, 0, 15],
+                [16, 0, 17, 0, 18, 0, 19, 0, 20,0],
+                [0,21, 0, 22, 0, 23, 0, 24, 0, 25],
+                [26, 0, 27, 0, 28, 0, 29, 0, 30,0],
+                [0,31, 0, 32,0, 33,0, 34,0, 35],
+                [36,0, 37,0, 38,0, 39,0, 40,0],
+                [0,41,0, 42,0, 42,0, 44,0, 45],
+                [46,0, 47,0, 48,0, 49,0, 50,0]];
+
     this.initiate = function(color){
 
         this.color = color;
@@ -25,13 +38,15 @@ function board_array(){
                         [0,1,0,1,0,1,0,1,0,1],
                         [1,0,1,0,1,0,1,0,1,0],
                         [0,0,0,0,0,0,0,0,0,0],
-                        [0,0,0,0,0,0,0,0,0,0],
+                        [0,0,0,0,1,0,0,0,0,0],
                         [0,2,0,2,0,2,0,2,0,2],
                         [2,0,2,0,2,0,2,0,2,0],
                         [0,2,0,2,0,2,0,2,0,2],
                         [2,0,2,0,2,0,2,0,2,0]];
 
             this.number = 2;
+            this.other = 1;
+            this.othercolor = "white"
         } if(color === 'white'){
             this.board = [[0,2,0,2,0,2,0,2,0,2],
                         [2,0,2,0,2,0,2,0,2,0],
@@ -45,6 +60,8 @@ function board_array(){
                         [1,0,1,0,1,0,1,0,1,0]]
 
             this.number = 1;
+            this.other = 1;
+            this.othercolor = "black";
         }
 
         let board_list = [];
@@ -86,6 +103,10 @@ function board_array(){
         return this.board[coor[0]][coor[1]];
     };
 
+    this.getnum = function(coor){
+        return this.nums[coor[0]][coor[1]];
+    }
+
     this.getcoor = function(field){
         var coor = this.ids[field];
         var list = [];
@@ -94,6 +115,35 @@ function board_array(){
 
         return list;
     };
+
+    this.move = function(field, coor_to){
+        var coor_from = this.getcoor(field);
+        
+        this.board[coor_to[0]][coor_to[1]] = this.number;
+        this.board[coor_from[0]][coor_from[1]] = 0;
+
+        //remove old
+        document.getElementById(field.toString()).classList.remove(this.color);
+        //add new
+        document.getElementById(this.getnum(coor_to).toString()).classList.add(this.color);
+    }
+
+    this.take = function(field, coor_to){
+        var coor_from = this.getcoor(field);
+        var coor_mid = [((coor_from[0]+coor_to[0])/2),((coor_to[1]+coor_from[1])/2)];
+
+        this.board[coor_to[0]][coor_to[1]] = this.number;
+        this.board[coor_from[0]][coor_from[1]] = 0;
+        this.board[coor_mid[0]][coor_mid[1]] = 0;
+
+        //remove old
+        document.getElementById(field.toString()).classList.remove(this.color);
+        //add new
+        document.getElementById(this.getnum(coor_to).toString()).classList.add(this.color);
+        //remove take
+        document.getElementById(this.getnum(coor_mid).toString()).classList.remove(this.othercolor);
+
+    }
 
     this.possible_moves = function(field){
         var coor = this.getcoor(field);
@@ -111,7 +161,7 @@ function board_array(){
                 }
             } 
             
-            if (this.board[coor[0]-1][coor[1]+1] === 0){
+            if ((this.board[coor[0]-1][coor[1]+1] === 0) && (this.board[coor[0]-1][coor[1]+1] !== this.number)){
                 //free square right
                 var new_square = [(coor[0]-1),(coor[1]+1)];
 
@@ -119,14 +169,9 @@ function board_array(){
                     options.push(new_square);
                 }
             } 
-
-            return options;
-
-        } else {
-            return null;
         }
 
-
+        return options;
     };
 
     this.possible_takes = function(field){
@@ -134,7 +179,7 @@ function board_array(){
         var options = [];
 
 
-        if ((this.board[coor[0]-1][coor[1]-1] !== 0) && (this.board[coor[0]-1][coor[1]-1] !== this.number)){
+        if ((this.board[coor[0]-1][coor[1]-1] === this.other) && (this.board[coor[0]-2][coor[1]-2] === 0)){
             //square left take
             var new_square = [(coor[0]-2),(coor[1]-2)];
 
@@ -143,7 +188,7 @@ function board_array(){
             };
         }
         
-        if ((this.board[coor[0]-1][coor[1]+1] !== 0) && (this.board[coor[0]-1][coor[1]+1] !== this.number)){
+        if ((this.board[coor[0]-1][coor[1]+1] === this.other) && (this.board[coor[0]-2][coor[1]+2] === 0)){
             //square right take
             var new_square = [(coor[0]-2),(coor[1]+2)];
             
@@ -152,7 +197,7 @@ function board_array(){
             };
         }
 
-        if ((this.board[coor[0]+1][coor[1]-1] !== 0) && (this.board[coor[0]+1][coor[1]-1] !== this.number)){
+        if ((this.board[coor[0]+1][coor[1]-1] === this.other) && (this.board[coor[0]+2][coor[1]-2] === 0)){
             //square left behind take
             var new_square = [(coor[0]+2),(coor[1]-2)];
 
@@ -161,7 +206,7 @@ function board_array(){
             };
         }
 
-        if ((this.board[coor[0]+1][coor[1]+1] !== 0) && (this.board[coor[0]+1][coor[1]+1] !== this.number)){
+        if ((this.board[coor[0]+1][coor[1]+1] === this.other) && (this.board[coor[0]+2][coor[1]+2] === 0)){
             //square right behind take
             var new_square = [(coor[0]+2),(coor[1]+2)];
 
@@ -169,30 +214,40 @@ function board_array(){
                 options.push(new_square);
             };
         }
+
+        return options;
     }
 }
 
 function addEvents(array){
     this.start = function (){
-        var t = document.getElementById("table");
-        tr = t.getElementsByTagName("tr")[0];
-        td = t.getElementsByTagName("td")[0];
 
-        Array.from(td).forEach(function(e){
-            e.addEventListener("click", function(){
-                var field = e.target.id;
+        const td = Array.from(document.getElementsByTagName("p"));
+
+        td.forEach(x => x.addEventListener("click", event =>{
+
+                td.forEach(u => u.classList.remove("possible"));
+
+                var field = x.id;
 
                 var moves = array.possible_moves(field);
                 var takes = array.possible_takes(field);
 
-                var fields = [];
+                for(let y = 0; y < moves.length; y++){
+                    document.getElementById(array.getnum(moves[y]).toString()).classList.add('possible');
+                    document.getElementById(array.getnum(moves[y]).toString()).addEventListener("click", move =>{
+                        array.move(field, moves[y]);
 
-                moves.forEach(x => fields.push(getid(x)));
-                takes.forEach(x => fields.push(getid(x)));
+                    });
+                }    
 
-                field.forEach(x => document.getElementById(x.toString()).classList.add('.possible'));
-            });
-        });
+                for(let z = 0; z < takes.length; z++){
+                    document.getElementById(array.getnum(takes[z]).toString()).classList.add('possible');
+                    document.getElementById(array.getnum(takes[z]).toString()).addEventListener("click", take =>{
+                        array.take(field, takes[z]);
+                    });
+                } 
+            }));
     };
 }
 
@@ -212,14 +267,8 @@ function state(status){
 
 (function intiate(){
     var board = new board_array();
-    board.initiate('white');
+    board.initiate('black');
     var events = new addEvents(board);
     events.start(); 
-
-
-
-
-    console.log(board.possible_moves(31));
-    console.log(board.possible_moves(3));
 
 })();

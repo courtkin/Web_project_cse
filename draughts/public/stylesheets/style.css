@@ -1,37 +1,39 @@
 td {
-  background-color:rgb(105, 202, 145);
-}
-
-main {
-  background-color: burlywood;
-}
-
-.noPiece {
-  background-color: white;
-  width: 65px;
-  height: 65px;
-  text-align: center;
-}
-
-.black {
-  background-color: black;
-  border-radius: 50px;
-  width: 20px;
-  height: 20px;
-  padding: 12px;
-}
-
-.white {
-  background-color:white;
-  border-radius: 50px;
-  width: 20px;
-  height: 20px;
-  padding: 12px;
-}
-
-.possible { 
-  background-color:#7e0b31;
-  width: 65px;
-  height: 65px;
-  text-align: center;
-}
+    background-color:rgb(105, 202, 145);
+  }
+  
+  main {
+    background-color: burlywood;
+  }
+  
+  .noPiece {
+    background-color: white;
+    width: 65px;
+    height: 65px;
+    text-align: center;
+  }
+  
+  .black {
+    background-color: black;
+    border-radius: 50px;
+    width: 20px;
+    height: 20px;
+    padding: 12px;
+  }
+  
+  .white {
+    background-color:white;
+    border-radius: 50px;
+    width: 20px;
+    height: 20px;
+    padding: 12px;
+  }
+  
+  .possible { 
+    background-color:#7e0b31;
+    border-radius: 25px;
+    width: 10px;
+    height: 10px;
+    padding: 6px;
+    text-align: center;
+  }
