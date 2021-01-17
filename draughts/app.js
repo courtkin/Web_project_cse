@@ -1,41 +1,51 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+var express = require("express");
+var http = require("http");
+var websocket = require("ws");
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
+var indexRouter = require("./routes/index");
+var messages = require("./public/javascripts/messages");
 
+var gameStatus = require("./statTracker");
+var Game = require("./game");
+
+var port = process.argv[2];
 var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'ejs');
+app.use(express.static(__dirname + "/public"));
 
-app.use(logger('dev'));
-app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  next(createError(404));
+/* Add the stats later, for now only the plash screen with no templates. */
+app.get("/", function (req, res, next) {
+  res.sendFile("splash.html", {root: "./public"});
 });
 
-// error handler
-app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+app.get("/splash", indexRouter);
+app.get("/play", indexRouter);
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+var server = http.createServer(app);
+const wss = new websocket.Server({server});
+
+var websockets = {}; //property: websocket, value: game
+
+/*
+ * regularly clean up the websockets object
+ */
+setInterval(function() {
+  for (let i in websockets) {
+    if (Object.prototype.hasOwnProperty.call(websockets,i)) {
+      let gameObj = websockets[i];
+      //if the gameObj has a final status, the game is complete/aborted
+      if (gameObj.finalStatus != null) {
+        delete websockets[i];
+      }
+    }
+  }
+}, 50000);
+
+var currentGame = new Game(gameStatus.gamesInitialized++);
+var connectionID = 0;
+
+wss.on("connection", function connection(ws) {
+    
 });
 
-module.exports = app;
+server.listen(port);

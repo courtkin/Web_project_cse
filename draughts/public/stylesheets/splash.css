@@ -1,0 +1,24 @@
+body {
+    background-color: darkslategrey;
+    height: 100%;
+}
+
+#title {
+    text-align: center;
+    font-family: 'Lucida Sans';
+    font-size: 400%;
+    margin-bottom: unset;
+}
+
+#subtitle {
+    text-align: center;
+    font-family: 'Lucida Sans';
+    font-size: 170%;
+    margin-top: unset;
+}
+
+#middle_left {
+    width: 50%;
+}
+
+
