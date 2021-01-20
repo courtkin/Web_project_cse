@@ -36,31 +36,31 @@
     exports.S_PLAYER_WHITE = JSON.stringify(exports.O_PLAYER_WHITE);
 
     /*
-    * Server to both player: it is Black's turn.
+    * Client to server: black played.
     */
-    exports.T_TURN_TYPE = "TURN-TYPE";
-    exports.O_TURN_BLACK = {
-        type: exports.T_TURN_TYPE,
-        data: "BLACK"
+    exports.T_BLACK_PLAYED = "BLACK-PLAYED";
+    exports.O_BLACK_PLAYED = {
+        type: exports.T_BLACK_PLAYED,
     };
-    exports.S_TURN_BLACK = JSON.stringify(exports.O_TURN_BLACK);
+    exports.S_BLACK_PLAYED = JSON.stringify(exports.O_BLACK_PLAYED);
 
     /*
-    * Server to both player: it is White's turn.
+    * Client to server: white played.
     */
-    exports.O_TURN_WHITE = {
-        type: exports.T_TURN_TYPE,
-        data: "WHITE"
+    exports.T_WHITE_PLAYED = "WHITE-PLAYED";
+    exports.O_WHITE_PLAYED = {
+        type: exports.T_BLACK_PLAYED,
     };
-    exports.S_TURN_WHITE = JSON.stringify(exports.O_TURN_WHITE);
+    exports.S_WHITE_PLAYED = JSON.stringify(exports.O_WHITE_PLAYED);
 
     /*
-    * Client to server: made a move.
+    * Server to both players: who is going to play the next turn.
     */
-    exports.O_MADE_MOVE = {
-        type: "MADE-MOVE"
-    };
-    exports.S_MADE_MOVE = JSON.stringify(exports.O_MADE_MOVE);
+    exports.T_NEXT_TURN = "NEXT-TURN";
+    exports.O_NEXT_TURN = {
+        type: exports.T_NEXT_TURN,
+        data: null
+    }
 
     /*
     * Server to both players: game over with result won/loss.

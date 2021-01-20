@@ -8,15 +8,15 @@ var game = function(gameID) {
 };
 
 /* The different states a game can be in. */
-game.prototype.transitionStates = {};
-game.prototype.transitionStates["0 JOINT"] = 0;
-game.prototype.transitionStates["1 JOINT"] = 1;
-game.prototype.transitionStates["2 JOINT"] = 2;
-game.prototype.transitionStates["BLACK TURN"] = 3;
-game.prototype.transitionStates["WHITE TURN"] = 4;
-game.prototype.transitionStates["BLACK WON"] = 5;
-game.prototype.transitionStates["WHITE WON"] = 6;
-game.prototype.transitionStates["ABORTED"] = 7;
+game.prototype.gameStates = {};
+game.prototype.gameStates["0 JOINT"] = 0;
+game.prototype.gameStates["1 JOINT"] = 1;
+game.prototype.gameStates["2 JOINT"] = 2;
+game.prototype.gameStates["BLACK TURN"] = 3;
+game.prototype.gameStates["WHITE TURN"] = 4;
+game.prototype.gameStates["BLACK"] = 5;
+game.prototype.gameStates["WHITE"] = 6;
+game.prototype.gameStates["ABORTED"] = 7;
 
 /* The possible transitions from one game state to another.
 * IMPORTANT DESIGN DECISION: I decided that the game determines the winning player in opponent's turn.
@@ -35,59 +35,27 @@ game.prototype.transitionMatrix = [
 ];
 
 game.prototype.isValidTransition = function(from, to) {
-    console.assert(
-        typeof from == "string",
-        "%s: Expecting a string, got a %s",
-        arguments.callee.name,
-        typeof from
-    );
-    console.assert(
-        typeof to == "string",
-        "%s: Expecting a string, got a %s",
-        arguments.callee.name,
-        typeof to
-    );
-    console.assert(
-        from in game.prototype.transitionStates == true,
-        "%s: Expecting %s to be a valid transition state",
-        arguments.callee.name,
-        from
-    );
-    console.assert(
-        to in game.prototype.transitionStates == true,
-        "%s: Expecting %s to be a valid transition state",
-        arguments.callee.name,
-        to
-    );
-
     let i, j;
-    if (!(from in game.prototype.transitionStates)) {
+    if (!(from in game.prototype.gameStates)) {
         return false;
     } else {
-        i = game.prototype.transitionStates[from];
+        i = game.prototype.gameStates[from];
     }
 
-    if (!(to in game.prototype.transitionStates)) {
+    if (!(to in game.prototype.gameStates)) {
         return false;
     } else {
-        j = game.prototype.transitionStates[to];
+        j = game.prototype.gameStates[to];
     }
 
     return game.prototype.transitionMatrix[i][j] > 0;
 };
 
 game.prototype.isValidState = function(state) {
-    return state in game.prototype.transitionStates;
+    return state in game.prototype.gameStates;
 };
 
 game.prototype.setState = function(newState) {
-    console.assert(
-        typeof newState == "string",
-        "%s: Expecting a string, got a %s",
-        arguments.callee.name,
-        typeof newState
-    );
-
     if (game.prototype.isValidState(newState) && game.prototype.isValidTransition(this.gameState, newState)) {
         this.gameState = newState;
         console.log("STATE: %s", this.gameState);
@@ -105,13 +73,6 @@ game.prototype.hasTwoConnectedPlayers = function() {
 };
 
 game.prototype.addPlayer = function(player) {
-    console.assert(
-        p instanceof Object,
-        "%s: Expecting an object (WebSocket), got a %s",
-        arguments.callee.name,
-        typeof player
-    );
-
     if ((this.gameState != "0 JOINT") && (this.gameState != "1 JOINT")) {
         return new Error(
             "Cannot add a player. Game state is: %s",
