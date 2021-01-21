@@ -20,9 +20,10 @@
     * Server to client: set as Player Black.
     */
     exports.T_PLAYER_TYPE = "PLAYER-TYPE";
+
     exports.O_PLAYER_BLACK = {
         type: exports.T_PLAYER_TYPE,
-        data: "BLACK"
+        data: "black"
     };
     exports.S_PLAYER_BLACK = JSON.stringify(exports.O_PLAYER_BLACK);
 
@@ -31,7 +32,7 @@
     */
     exports.O_PLAYER_WHITE = {
         type: exports.T_PLAYER_TYPE,
-        data: "WHITE"
+        data: "white"
     };
     exports.S_PLAYER_WHITE = JSON.stringify(exports.O_PLAYER_WHITE);
 
@@ -41,6 +42,9 @@
     exports.T_BLACK_PLAYED = "BLACK-PLAYED";
     exports.O_BLACK_PLAYED = {
         type: exports.T_BLACK_PLAYED,
+        data: "black",
+        field: null,
+        move: null
     };
     exports.S_BLACK_PLAYED = JSON.stringify(exports.O_BLACK_PLAYED);
 
@@ -50,6 +54,9 @@
     exports.T_WHITE_PLAYED = "WHITE-PLAYED";
     exports.O_WHITE_PLAYED = {
         type: exports.T_BLACK_PLAYED,
+        data: "white",
+        field: null,
+        move: null
     };
     exports.S_WHITE_PLAYED = JSON.stringify(exports.O_WHITE_PLAYED);
 
@@ -59,7 +66,9 @@
     exports.T_NEXT_TURN = "NEXT-TURN";
     exports.O_NEXT_TURN = {
         type: exports.T_NEXT_TURN,
-        data: null
+        data: "white",
+        field: null,
+        move: null
     }
 
     /*

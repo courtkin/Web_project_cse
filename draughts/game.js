@@ -87,10 +87,10 @@ game.prototype.addPlayer = function(player) {
 
     if (this.playerBlack ==  null) {
         this.playerBlack = player;
-        return "BLACK";
+        return "black";
     } else {
         this.playerWhite = player;
-        return "WHITE";
+        return "white";
     }
 };
 

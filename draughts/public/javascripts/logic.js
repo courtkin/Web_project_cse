@@ -41,7 +41,7 @@ function board_array(){
                         [0,1,0,1,0,1,0,1,0,1],
                         [1,0,1,0,1,0,1,0,1,0],
                         [0,0,0,0,0,0,0,0,0,0],
-                        [0,0,0,0,1,0,0,0,0,0],
+                        [0,0,0,0,0,0,0,0,0,0],
                         [0,2,0,2,0,2,0,2,0,2],
                         [2,0,2,0,2,0,2,0,2,0],
                         [0,2,0,2,0,2,0,2,0,2],
@@ -63,7 +63,7 @@ function board_array(){
                         [1,0,1,0,1,0,1,0,1,0]]
 
             this.number = 1;
-            this.other = 1;
+            this.other = 2;
             this.othercolor = "black";
         }
 
@@ -93,16 +93,66 @@ function board_array(){
         this.list = board_list;
     };
 
+    this.getBoardList = function(){
+        return this.list;
+    }
+
     this.setTurn = function(input){
         this.turn = input;
+    }
+
+    this.getTurn = function(){
+        return this.turn;
+    }
+
+    this.getNumber = function(){
+        return this.number;
+    }
+
+    this.getOther = function(){
+        return this.other;
+    }
+    
+    this.getColor = function(){
+        return this.color;
     }
 
     this.getBoard = function(){
         return this.board;
     };
 
-    this.setBoard = function(board){
-        this.board = board;
+    this.setBoard = function(input_board){
+        board_switched = [];
+
+        for(let j = 9; j > -1; j++){
+            board_switched.push(input_board[j]);
+        }
+
+        this.board = board_switched;
+
+        let board_list = [];
+
+        for (let j = 0; j < 10; j = j + 2){
+            for (let k = 1; k < 10; k = k + 2){
+                board_list.push(this.board[j][k]);
+            }
+
+            for (let l = 0; l < 10; l = l + 2){
+                board_list.push(this.board[j+1][l]);
+            }
+        }
+
+
+        for (let m = 0; m < 50 ; m++){
+            var ind = m + 1;
+            var tbl_item = document.getElementById(ind.toString());
+
+            if (board_list[m] === 1){
+                tbl_item.classList.add('white');
+            } if (board_list[m] === 2){
+                tbl_item.classList.add('black');
+            }
+        }    
     };
 
     this.getid = function(coor){
@@ -245,12 +295,55 @@ function board_array(){
     }
 }
 
-function addEvents(array){
+function gameOver(board){
+    let playboard = board.getBoard()
+    let amount_self = 0;
+    let amount_other = 0;
+
+    for(let i = 0; i < 10; i++){
+        for(let j = 0; j < 10; j++){
+            if(playboard[i][j] === board.getNumber()){
+                amount_self++;
+            }
+
+            if(playboard[i][j] === board.getOther()){
+                amount_other++;
+            }
+        }
+    }
+    if (amount_self === 0){
+        return "self";
+    }
+
+    if (amount_other === 0){
+        return "other";
+    }
+
+    return "gameon";
+}
+
+function addEvents(array, ws){
     const td = Array.from(document.getElementsByTagName("p"));
 
     this.start = function (){
         td.forEach(ele => add_listener(ele));
     };
+
+    function sendmessage(field, move){
+        if(array.getColor() === "white"){
+            let outmsg = Messages.O_WHITE_PLAYED;
+            outmsg.field = field;
+            outmsg.move = move;
+            ws.send(JSON.stringify(outmsg));
+        }
+        
+        if(array.getColor() === "black"){
+            let outmsg = Messages.O_BLACK_PLAYED;
+            outmsg.field = field;
+            outmsg.move = move;
+            ws.send(JSON.stringify(outmsg));
+        }  
+    }
 
     function add_listener(e){
         e.addEventListener("click", function click_event(el){
@@ -268,6 +361,7 @@ function addEvents(array){
                 document.getElementById(array.getnum(moves[y]).toString()).addEventListener("click", move =>{
                     array.move(field, moves[y]);
                     array.setTurn(0);
+                    sendmessage(field, moves[y]);
                 }); 
             }    
 
@@ -276,25 +370,101 @@ function addEvents(array){
                 document.getElementById(array.getnum(takes[z]).toString()).addEventListener("click", take =>{
                     array.take(field, takes[z]);
                     array.setTurn(0);
+                    sendmessage(field, moves[y]);
                 });
             } 
         })
     }
 }    
 
-function state(status){
-    this.playercolor = null;
-    this.status = status;
+(function initiate(){
+    var ws = new WebSocket(Setup.WEB_SOCKET_URL);
+    var board = new board_array();
+    
 
-    this.getStatus = function(){
-        return this.status;
+    ws.onmessage = function(event){
+        let msg = JSON.parse(event.data);
+        let listeners = new addEvents(board, ws);
+        
+        if(msg.type === Messages.T_PLAYER_TYPE){
+
+            board.initiate(msg.data);
+
+            if(board.getColor() === "black"){
+                board.setTurn(1);
+                listeners.start();
+            } 
+
+            if(board.getColor() === "white"){
+                board.setTurn(0);
+                listeners.start();
+            }
+        }
+
+        
+
+        if((msg.type === Messages.T_NEXT_TURN) && (msg.data === "white") && (board.getColor() === "white")){
+            console.log(msg.board)
+            board.setBoard(msg.board);
+            
+            board.setTurn(1);
+
+            /* if(gameOver(board) === "self"){
+                let outmsg = Messages.O_GAME_WON_BY;
+                outmsg.data = "white";
+                ws.send(JSON.stringify(outmsg));
+            } 
+
+            if(gameOver(board) === "other"){
+                let outmsg = Messages.O_GAME_WON_BY;
+                outmsg.data = "black";
+                ws.send(JSON.stringify(outmsg));
+            }  */
+            
+            /* if(gameOver(board) === "gameon") {
+                let outmsg = Messages.O_WHITE_PLAYED;
+                outmsg.board = board.getBoard();
+                ws.send(JSON.stringify(outmsg));
+            } */
+        }
+
+        if((msg.type === Messages.T_NEXT_TURN) && (msg.data === "black") && (board.getColor() === "black")){
+            console.log(msg.board);
+            
+            board.setBoard(msg.board);
+            board.setTurn(1);
+
+            /* if(gameOver(board) === "self"){
+                let outmsg = Messages.O_GAME_WON_BY;
+                outmsg.data = "black";
+                ws.send(JSON.stringify(outmsg));
+            } 
+
+            if(gameOver(board) === "other"){
+                let outmsg = Messages.O_GAME_WON_BY;
+                outmsg.data = "white";
+                ws.send(JSON.stringify(outmsg));
+            } 
+            
+            if(gameOver(board) === "gameon") {
+                let outmsg = Messages.O_BLACK_PLAYED;
+                outmsg.board = board.getBoard();
+                ws.send(JSON.stringify(outmsg));
+            } */
+        }
+
+        if(msg.type === Messages.T_GAME_OVER){
+            if((msg.data === "black") && (board.getColor() === "black")){
+                document.getElementById("status").textContent = "YOU WON!"
+            } else if((msg.data === "white") && (board.getColor() === "white")){
+                document.getElementById("status").textContent = "YOU WON!"
+            } else {
+                document.getElementById("status").textContent = "YOU LOST!"
+            }
+        }
     }
-
-    this.getPlayerColor = function(){
-        return this.playercolor;
-    }
-
-}
+    
+})();
 
 
 

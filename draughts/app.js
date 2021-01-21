@@ -26,26 +26,11 @@ const wss = new websocket.Server({server});
 
 var websockets = {}; //property: websocket, value: game
 
-// /*
-//  * regularly clean up the websockets object
-//  */
-// setInterval(function() {
-//   for (let i in websockets) {
-//     if (Object.prototype.hasOwnProperty.call(websockets,i)) {
-//       let gameObj = websockets[i];
-//       //if the gameObj has a final status, the game is complete/aborted
-//       if (gameObj.finalStatus != null) {
-//         delete websockets[i];
-//       }
-//     }
-//   }
-// }, 50000);
 
 var currentGame = new Game(gameStatus.gamesInitialized++);
 var connectionID = 0;
 
 wss.on("connection", function connection(ws) {
-	console.log("test");
     let con = ws;
     con.id = connectionID++;
     let playerType = currentGame.addPlayer(con);
@@ -70,7 +55,7 @@ wss.on("connection", function connection(ws) {
 			winnerMsg.data = objectMessage.data;
 			gameObj.playerBlack.send(JSON.stringify(winnerMsg));
 			gameObj.playerWhite.send(JSON.stringify(winnerMsg));
-			gameObj.setStatus(objectMessage.data);
+			gameObj.setState(objectMessage.data);
 		} else if (objectMessage.type == messages.T_BLACK_PLAYED) {
 			let board = objectMessage.board;
 			let nextTurnMsg = messages.O_NEXT_TURN;
@@ -78,7 +63,7 @@ wss.on("connection", function connection(ws) {
 			nextTurnMsg.board = board;
 			gameObj.playerBlack.send(JSON.stringify(nextTurnMsg));
 			gameObj.playerWhite.send(JSON.stringify(nextTurnMsg));
-			gameObj.setStatus("WHITE TURN");
+			gameObj.setState("WHITE TURN");
 		} else if (objectMessage.type == messages.T_WHITE_PLAYED) {
 			let board = objectMessage.board;
 			let nextTurnMsg = messages.O_NEXT_TURN;
@@ -86,7 +71,7 @@ wss.on("connection", function connection(ws) {
 			nextTurnMsg.board = board;
 			gameObj.playerBlack.send(JSON.stringify(nextTurnMsg));
 			gameObj.playerWhite.send(JSON.stringify(nextTurnMsg));
-			gameObj.setStatus("BLACK TURN");
+			gameObj.setState("BLACK TURN");
 		}
 	});
 });
