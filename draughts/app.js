@@ -57,18 +57,26 @@ wss.on("connection", function connection(ws) {
 			gameObj.playerWhite.send(JSON.stringify(winnerMsg));
 			gameObj.setState(objectMessage.data);
 		} else if (objectMessage.type == messages.T_BLACK_PLAYED) {
-			let board = objectMessage.board;
+			let field = objectMessage.field;
+			let coor = objectMessage.coor;
+			let type = objectMessage.type;
 			let nextTurnMsg = messages.O_NEXT_TURN;
 			nextTurnMsg.data = "white";
-			nextTurnMsg.board = board;
+			nextTurnMsg.field = field;
+			nextTurnMsg.coor = coor;
+			nextTurnMsg.type = type;
 			gameObj.playerBlack.send(JSON.stringify(nextTurnMsg));
 			gameObj.playerWhite.send(JSON.stringify(nextTurnMsg));
 			gameObj.setState("WHITE TURN");
 		} else if (objectMessage.type == messages.T_WHITE_PLAYED) {
-			let board = objectMessage.board;
+			let field = objectMessage.field;
+			let coor = objectMessage.coor;
+			let type = objectMessage.type;
 			let nextTurnMsg = messages.O_NEXT_TURN;
 			nextTurnMsg.data = "black";
-			nextTurnMsg.board = board;
+			nextTurnMsg.field = field;
+			nextTurnMsg.coor = coor;
+			nextTurnMsg.type = type;
 			gameObj.playerBlack.send(JSON.stringify(nextTurnMsg));
 			gameObj.playerWhite.send(JSON.stringify(nextTurnMsg));
 			gameObj.setState("BLACK TURN");

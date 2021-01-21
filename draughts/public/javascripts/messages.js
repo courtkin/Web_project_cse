@@ -44,7 +44,8 @@
         type: exports.T_BLACK_PLAYED,
         data: "black",
         field: null,
-        move: null
+        coor: null,
+        type: null
     };
     exports.S_BLACK_PLAYED = JSON.stringify(exports.O_BLACK_PLAYED);
 
@@ -56,7 +57,8 @@
         type: exports.T_BLACK_PLAYED,
         data: "white",
         field: null,
-        move: null
+        coor: null,
+        type: null
     };
     exports.S_WHITE_PLAYED = JSON.stringify(exports.O_WHITE_PLAYED);
 
@@ -68,7 +70,8 @@
         type: exports.T_NEXT_TURN,
         data: "white",
         field: null,
-        move: null
+        coor: null,
+        type: null
     }
 
     /*

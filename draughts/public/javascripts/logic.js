@@ -49,7 +49,7 @@ function board_array(){
 
             this.number = 2;
             this.other = 1;
-            this.othercolor = "white"
+            this.othercolor = "white";
         } if(color === 'white'){
             this.board = [[0,2,0,2,0,2,0,2,0,2],
                         [2,0,2,0,2,0,2,0,2,0],
@@ -60,7 +60,7 @@ function board_array(){
                         [0,1,0,1,0,1,0,1,0,1],
                         [1,0,1,0,1,0,1,0,1,0],
                         [0,1,0,1,0,1,0,1,0,1],
-                        [1,0,1,0,1,0,1,0,1,0]]
+                        [1,0,1,0,1,0,1,0,1,0]];
 
             this.number = 1;
             this.other = 2;
@@ -122,38 +122,44 @@ function board_array(){
     };
 
     this.setBoard = function(input_board){
-        board_switched = [];
-
-        for(let j = 9; j > -1; j++){
-            board_switched.push(input_board[j]);
-        }
-
-        this.board = board_switched;
-
-        let board_list = [];
-
-        for (let j = 0; j < 10; j = j + 2){
-            for (let k = 1; k < 10; k = k + 2){
-                board_list.push(this.board[j][k]);
-            }
-
-            for (let l = 0; l < 10; l = l + 2){
-                board_list.push(this.board[j+1][l]);
-            }
-        }
-
-
-        for (let m = 0; m < 50 ; m++){
-            var ind = m + 1;
-            var tbl_item = document.getElementById(ind.toString());
-
-            if (board_list[m] === 1){
-                tbl_item.classList.add('white');
-            } if (board_list[m] === 2){
-                tbl_item.classList.add('black');
-            }
-        }    
+        this.board = input_board;
     };
+
+    function convert(coor){
+        coor_result = [];
+        coor_result.push(9-coor[0]);
+        coor_result.push(9-coor[1]);
+        return coor_result;
+    }
+
+    this.update_board = function(field, coor, type){
+        let coor_from = convert(getcoor(field));
+        let coor_to = convert(coor);
+
+        if(type === "move"){
+            this.board[coor_to[0]][coor_to[1]] = this.other;
+            this.board[coor_from[0]][coor_from[1]] = 0;
+
+            //remove old
+            document.getElementById(field.toString()).classList.remove(this.othercolor);
+            //add new
+            document.getElementById(this.getnum(coor_to).toString()).classList.add(this.othercolor);
+        }
+
+        if(type == "take"){
+            var coor_mid = [((coor_from[0]+coor_to[0])/2),((coor_to[1]+coor_from[1])/2)];
+            this.board[coor_to[0]][coor_to[1]] = this.other;
+            this.board[coor_from[0]][coor_from[1]] = 0;
+            this.board[coor_mid[0]][coor_mid[1]] = 0;
+
+            //remove old
+            document.getElementById(field.toString()).classList.remove(this.othercolor);
+            //add new
+            document.getElementById(this.getnum(coor_to).toString()).classList.add(this.othercolor);
+            //remove take
+            document.getElementById(this.getnum(coor_mid).toString()).classList.remove(this.color);
+        }
+    }
 
     this.getid = function(coor){
         //must be list
@@ -329,18 +335,20 @@ function addEvents(array, ws){
         td.forEach(ele => add_listener(ele));
     };
 
-    function sendmessage(field, move){
+    function sendmessage(field, coor, type){
         if(array.getColor() === "white"){
             let outmsg = Messages.O_WHITE_PLAYED;
             outmsg.field = field;
-            outmsg.move = move;
+            outmsg.coor = coor;
+            outmsg.type = type;
             ws.send(JSON.stringify(outmsg));
         }
         
         if(array.getColor() === "black"){
             let outmsg = Messages.O_BLACK_PLAYED;
             outmsg.field = field;
-            outmsg.move = move;
+            outmsg.coor = coor;
+            outmsg.type = type;
             ws.send(JSON.stringify(outmsg));
         }  
     }
@@ -361,7 +369,7 @@ function addEvents(array, ws){
                 document.getElementById(array.getnum(moves[y]).toString()).addEventListener("click", move =>{
                     array.move(field, moves[y]);
                     array.setTurn(0);
-                    sendmessage(field, moves[y]);
+                    sendmessage(field, moves[y], "move");
                 }); 
             }    
 
@@ -370,7 +378,7 @@ function addEvents(array, ws){
                 document.getElementById(array.getnum(takes[z]).toString()).addEventListener("click", take =>{
                     array.take(field, takes[z]);
                     array.setTurn(0);
-                    sendmessage(field, moves[y]);
+                    sendmessage(field, takes[z], "take");
                 });
             } 
         })
@@ -404,8 +412,9 @@ function addEvents(array, ws){
         
 
         if((msg.type === Messages.T_NEXT_TURN) && (msg.data === "white") && (board.getColor() === "white")){
-            console.log(msg.board)
-            board.setBoard(msg.board);
+            console.log(msg);
+            
+            board.update_board(msg.field, msg.coor, msg.type);
             
             board.setTurn(1);
 
@@ -429,9 +438,9 @@ function addEvents(array, ws){
         }
 
         if((msg.type === Messages.T_NEXT_TURN) && (msg.data === "black") && (board.getColor() === "black")){
-            console.log(msg.board);
             
-            board.setBoard(msg.board);
+            console.log(msg);
+            board.update_board(msg.field, msg.coor, msg.type);
             board.setTurn(1);
 
             /* if(gameOver(board) === "self"){
