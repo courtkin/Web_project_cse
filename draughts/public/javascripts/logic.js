@@ -1,3 +1,5 @@
+//const exp = require("express");
+
 function board_array(){
     this.board = null;
     this.list = null;
@@ -5,6 +7,7 @@ function board_array(){
     this.number = null;
     this.other = null;
     this.othercolor = null;
+    this.turn = null;
 
     this.ids = {1:[1,0], 2:[3,0], 3:[5,0], 4:[7,0], 5:[9,0],
                 6:[0,1], 7:[2,1], 8:[4,1], 9:[6,1], 10:[8,1],
@@ -90,6 +93,10 @@ function board_array(){
         this.list = board_list;
     };
 
+    this.setTurn = function(input){
+        this.turn = input;
+    }
+
     this.getBoard = function(){
         return this.board;
     };
@@ -150,25 +157,31 @@ function board_array(){
         var options = [];
 
         
-        if (document.getElementById(field.toString()).classList.contains(this.color)){
+        if ((document.getElementById(field.toString()).classList.contains(this.color)) && (this.turn === 1)){
 
-            if (this.board[coor[0]-1][coor[1]-1] === 0){
-                //free square left
-                var new_square = [(coor[0]-1),(coor[1]-1)];
+            if(coor[1] !== 0){
 
-                if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
-                    options.push(new_square);
-                }
-            } 
+                if (this.board[coor[0]-1][coor[1]-1] === 0){
+                    //free square left
+                    var new_square = [(coor[0]-1),(coor[1]-1)];
+
+                    if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
+                        options.push(new_square);
+                    }
+                } 
+            }
+
+            if(coor[1] !== 9){
             
-            if ((this.board[coor[0]-1][coor[1]+1] === 0) && (this.board[coor[0]-1][coor[1]+1] !== this.number)){
-                //free square right
-                var new_square = [(coor[0]-1),(coor[1]+1)];
+                if ((this.board[coor[0]-1][coor[1]+1] === 0) && (this.board[coor[0]-1][coor[1]+1] !== this.number)){
+                    //free square right
+                    var new_square = [(coor[0]-1),(coor[1]+1)];
 
-                if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
-                    options.push(new_square);
-                }
-            } 
+                    if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
+                        options.push(new_square);
+                    }
+                } 
+            }
         }
 
         return options;
@@ -178,41 +191,54 @@ function board_array(){
         var coor = this.getcoor(field);
         var options = [];
 
+        if ((document.getElementById(field.toString()).classList.contains(this.color)) && (this.turn === 1)){
 
-        if ((this.board[coor[0]-1][coor[1]-1] === this.other) && (this.board[coor[0]-2][coor[1]-2] === 0)){
-            //square left take
-            var new_square = [(coor[0]-2),(coor[1]-2)];
+            if(coor[1] !== 0){
+                if ((this.board[coor[0]-1][coor[1]-1] === this.other) && (this.board[coor[0]-2][coor[1]-2] === 0)){
+                    //square left take
+                    var new_square = [(coor[0]-2),(coor[1]-2)];
 
-            if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
-                options.push(new_square);
-            };
-        }
-        
-        if ((this.board[coor[0]-1][coor[1]+1] === this.other) && (this.board[coor[0]-2][coor[1]+2] === 0)){
-            //square right take
-            var new_square = [(coor[0]-2),(coor[1]+2)];
+                    if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
+                        options.push(new_square);
+                    };
+                }
+
+                if(coor[0] !== 9){
+                    if ((this.board[coor[0]+1][coor[1]-1] === this.other) && (this.board[coor[0]+2][coor[1]-2] === 0)){
+                        //square left behind take
+                        var new_square = [(coor[0]+2),(coor[1]-2)];
             
-            if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
-                options.push(new_square);
-            };
-        }
+                        if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
+                            options.push(new_square);
+                        };
+                    }
+                }
+                
+            }    
 
-        if ((this.board[coor[0]+1][coor[1]-1] === this.other) && (this.board[coor[0]+2][coor[1]-2] === 0)){
-            //square left behind take
-            var new_square = [(coor[0]+2),(coor[1]-2)];
+            if(coor[1] !== 9){    
+                
+                if ((this.board[coor[0]-1][coor[1]+1] === this.other) && (this.board[coor[0]-2][coor[1]+2] === 0)){
+                    //square right take
+                    var new_square = [(coor[0]-2),(coor[1]+2)];
+                        
+                    if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
+                            options.push(new_square);
+                    };
+                }
 
-            if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
-                options.push(new_square);
-            };
-        }
+                if(coor[0] !== 9){
+                    if ((this.board[coor[0]+1][coor[1]+1] === this.other) && (this.board[coor[0]+2][coor[1]+2] === 0)){
+                        //square right behind take
+                        var new_square = [(coor[0]+2),(coor[1]+2)];
 
-        if ((this.board[coor[0]+1][coor[1]+1] === this.other) && (this.board[coor[0]+2][coor[1]+2] === 0)){
-            //square right behind take
-            var new_square = [(coor[0]+2),(coor[1]+2)];
+                        if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
+                            options.push(new_square);
+                        };
+                    }
+                }   
+            }    
 
-            if((new_square[0]>=0 && new_square[0]<=9) && (new_square[1]>=0 && new_square[1]<=9)){
-                options.push(new_square);
-            };
         }
 
         return options;
@@ -220,36 +246,41 @@ function board_array(){
 }
 
 function addEvents(array){
+    const td = Array.from(document.getElementsByTagName("p"));
+
     this.start = function (){
-
-        const td = Array.from(document.getElementsByTagName("p"));
-
-        td.forEach(x => x.addEventListener("click", event =>{
-
-                td.forEach(u => u.classList.remove("possible"));
-
-                var field = x.id;
-
-                var moves = array.possible_moves(field);
-                var takes = array.possible_takes(field);
-
-                for(let y = 0; y < moves.length; y++){
-                    document.getElementById(array.getnum(moves[y]).toString()).classList.add('possible');
-                    document.getElementById(array.getnum(moves[y]).toString()).addEventListener("click", move =>{
-                        array.move(field, moves[y]);
-
-                    });
-                }    
-
-                for(let z = 0; z < takes.length; z++){
-                    document.getElementById(array.getnum(takes[z]).toString()).classList.add('possible');
-                    document.getElementById(array.getnum(takes[z]).toString()).addEventListener("click", take =>{
-                        array.take(field, takes[z]);
-                    });
-                } 
-            }));
+        td.forEach(ele => add_listener(ele));
     };
-}
+
+    function add_listener(e){
+        e.addEventListener("click", function click_event(el){
+
+            td.forEach(u => u.classList.remove("possible"));
+
+            var field = e.id;
+
+            var moves = array.possible_moves(field);
+
+            var takes = array.possible_takes(field);
+
+            for(let y = 0; y < moves.length; y++){
+                document.getElementById(array.getnum(moves[y]).toString()).classList.add('possible');
+                document.getElementById(array.getnum(moves[y]).toString()).addEventListener("click", move =>{
+                    array.move(field, moves[y]);
+                    array.setTurn(0);
+                }); 
+            }    
+
+            for(let z = 0; z < takes.length; z++){
+                document.getElementById(array.getnum(takes[z]).toString()).classList.add('possible');
+                document.getElementById(array.getnum(takes[z]).toString()).addEventListener("click", take =>{
+                    array.take(field, takes[z]);
+                    array.setTurn(0);
+                });
+            } 
+        })
+    }
+}    
 
 function state(status){
     this.playercolor = null;
@@ -265,10 +296,5 @@ function state(status){
 
 }
 
-(function intiate(){
-    var board = new board_array();
-    board.initiate('black');
-    var events = new addEvents(board);
-    events.start(); 
 
-})();
+
